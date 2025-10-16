@@ -11,6 +11,8 @@ const withPWA = require('next-pwa')({
 
 const nextConfig = {
   reactStrictMode: true,
+  // Enable static export output so `next build` creates a static site for `next export` behavior
+  output: 'export',
   // any other configs
 };
 

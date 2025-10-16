@@ -7,12 +7,13 @@
     "build": "next build --turbopack",
     "start": "next start",
     "export": "next export",
-    "build:export": "next build --turbopack && next export -o out",
+  "build:export": "next build --turbopack",
     "deploy:firebase": "echo 'Run firebase deploy --only hosting' && exit 1"
   },
   "dependencies": {
     "next": "15.5.5",
-    "next-pwa": "^5.6.0",
+  "next-pwa": "^5.6.0",
+  "firebase": "^12.4.0",
     "react": "19.1.0",
     "react-dom": "19.1.0"
   },

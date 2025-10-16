@@ -1,29 +1,16 @@
 "use client";
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '../context/AuthContext';
-import InstallButton from '../components/InstallButton';
+import { useAuth } from '../../context/AuthContext';
 
 const ROLE_KEY = 'user_role';
 
-export default function HomePage() {
+export default function LoginPage() {
   const { user, loading, signInWithGoogle } = useAuth();
   const router = useRouter();
   const [role, setRole] = useState('');
 
-  // Redirect if user is already logged in
-  useEffect(() => {
-    if (!loading && user) {
-      const savedRole = localStorage.getItem(ROLE_KEY) || 'user'; // Default to 'user' if no role
-      if (savedRole === 'organizer') {
-        router.replace('/organizer');
-      } else {
-        router.replace('/events');
-      }
-    }
-  }, [user, loading, router]);
-
-  // On component mount, try to get the role from localStorage for the radio buttons
+  // On component mount, try to get the role from localStorage
   useEffect(() => {
     const savedRole = localStorage.getItem(ROLE_KEY);
     if (savedRole) {
@@ -31,27 +18,35 @@ export default function HomePage() {
     }
   }, []);
 
+
+  console.log(user)
+  // After login, redirect based on the selected role
+  useEffect(() => {
+    if (!loading && user) {
+      const savedRole = localStorage.getItem(ROLE_KEY);
+      console.log(savedRole)
+      if (savedRole === 'organizer') {
+        router.replace('/organizer');
+      } else if (savedRole === 'user') {
+        router.replace('/events');
+      } else {
+        // Default redirect if no role is found, though this shouldn't happen
+        // router.replace('/');
+      }
+    }
+  }, [user, loading, router]);
+
   const handleRoleChange = (e) => {
     const newRole = e.target.value;
     setRole(newRole);
     localStorage.setItem(ROLE_KEY, newRole);
   };
 
-  // If we are checking auth or the user is logged in, show a loading state to avoid content flash
-  if (loading || user) {
-    return (
-        <div className="min-h-screen flex items-center justify-center">
-            <p>Loading...</p>
-        </div>
-    );
-  }
-
-  // If not logged in, show the role selection and login UI
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-gray-50">
       <div className="max-w-md w-full p-8 border rounded-lg shadow-md bg-white">
-        <h1 className="text-2xl font-bold mb-4 text-center">Welcome to PartyPlan</h1>
-        <p className="mb-6 text-center text-gray-600">Select your role to get started.</p>
+        <h1 className="text-2xl font-bold mb-4 text-center">Welcome</h1>
+        <p className="mb-6 text-center text-gray-600">First, select your role.</p>
         
         <div className="mb-6 space-y-4">
             <label className="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-100">
@@ -80,15 +75,11 @@ export default function HomePage() {
 
         <button 
           onClick={signInWithGoogle} 
-          disabled={!role}
-          className="w-full px-4 py-2 mb-4 bg-blue-600 text-white rounded-md disabled:bg-gray-400 disabled:cursor-not-allowed"
+          disabled={!role || loading}
+          className="w-full px-4 py-2 bg-blue-600 text-white rounded-md disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
-          Sign in with Google
+          {loading ? 'Loading...' : 'Sign in with Google'}
         </button>
-
-        <div className="text-center">
-          <InstallButton />
-        </div>
       </div>
     </div>
   );

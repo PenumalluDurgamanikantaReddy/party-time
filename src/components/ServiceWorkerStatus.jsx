@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 export default function ServiceWorkerStatus() {
   const [status, setStatus] = useState("unknown");
   const [controller, setController] = useState(null);
+  const [reloaded, setReloaded] = useState(false);
 
   const InstallButton = dynamic(() => import("./InstallButton"), { ssr: false });
   useEffect(() => {
@@ -25,7 +26,22 @@ export default function ServiceWorkerStatus() {
     setController(navigator.serviceWorker.controller || null);
 
     function onControllerChange() {
-      setController(navigator.serviceWorker.controller || null);
+      const ctrl = navigator.serviceWorker.controller || null;
+      setController(ctrl);
+      // If a service worker just took control and we haven't reloaded yet,
+      // reload the page so the current page is controlled. This makes the
+      // beforeinstallprompt available in many browsers on first visit.
+      if (ctrl && !reloaded) {
+        try {
+          // small delay so UI updates first
+          setTimeout(() => {
+            setReloaded(true);
+            location.reload();
+          }, 300);
+        } catch (e) {
+          // ignore
+        }
+      }
     }
     navigator.serviceWorker.addEventListener('controllerchange', onControllerChange);
     return () => navigator.serviceWorker.removeEventListener('controllerchange', onControllerChange);
